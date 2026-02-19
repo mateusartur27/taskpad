@@ -34,7 +34,7 @@ export default function AppPage() {
     if (data) setTabs(data)
   }, [])
 
-  const fetchTasks = useCallback(async () => {
+  const fetchTasks = useCallback(async (fromRealtime = false) => {
     const { data } = await supabase
       .from('tasks')
       .select('*')
@@ -45,7 +45,28 @@ export default function AppPage() {
         if (!grouped[task.tab_id]) grouped[task.tab_id] = []
         grouped[task.tab_id].push(task)
       })
-      setTasks(grouped)
+      if (fromRealtime) {
+        // Merge: preserve local text if it differs from DB (means a pending save is in flight)
+        setTasks(prev => {
+          const merged: Record<string, Task[]> = { ...grouped }
+          Object.keys(prev).forEach(tabId => {
+            if (merged[tabId]) {
+              merged[tabId] = merged[tabId].map(dbTask => {
+                const local = prev[tabId]?.find(t => t.id === dbTask.id)
+                if (local && local.text !== dbTask.text) {
+                  return { ...dbTask, text: local.text }
+                }
+                return dbTask
+              })
+            } else {
+              merged[tabId] = prev[tabId]
+            }
+          })
+          return merged
+        })
+      } else {
+        setTasks(grouped)
+      }
     }
   }, [])
 
@@ -92,7 +113,7 @@ export default function AppPage() {
     const tasksSub = supabase
       .channel('tasks-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'tasks' }, () => {
-        fetchTasks()
+        fetchTasks(true)
       })
       .subscribe()
 

@@ -32,7 +32,8 @@ export default function TaskEditor({ tabId, tabName, tasks, onTasksChange }: Tas
   }, [focusTaskId, tasks])
 
   const addTask = async () => {
-    const newPosition = tasks.length
+    const current = tasksRef.current
+    const newPosition = current.length
     const { data } = await supabase
       .from('tasks')
       .insert({
@@ -45,7 +46,7 @@ export default function TaskEditor({ tabId, tabName, tasks, onTasksChange }: Tas
       .select()
       .single()
     if (data) {
-      onTasksChange([...tasks, data])
+      onTasksChange([...current, data])
       setFocusTaskId(data.id)
     }
   }
@@ -92,11 +93,18 @@ export default function TaskEditor({ tabId, tabName, tasks, onTasksChange }: Tas
       if (task && task.text === '') {
         e.preventDefault()
         deleteTask(taskId)
-        // Focus previous task
+        // Focus previous task and place cursor at end of its text
         if (index > 0) {
           const prevTask = tasks[index - 1]
-          const prevInput = inputRefs.current.get(prevTask.id)
-          if (prevInput) prevInput.focus()
+          // Use setTimeout so the DOM updates before we focus + set cursor
+          setTimeout(() => {
+            const prevInput = inputRefs.current.get(prevTask.id)
+            if (prevInput) {
+              prevInput.focus()
+              const len = prevInput.value.length
+              prevInput.setSelectionRange(len, len)
+            }
+          }, 0)
         }
       }
     } else if (e.key === 'ArrowUp' && index > 0) {
