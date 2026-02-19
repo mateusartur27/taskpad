@@ -18,6 +18,8 @@ export default function TaskEditor({ tabId, tabName, tasks, onTasksChange }: Tas
   const inputRefs = useRef<Map<string, HTMLTextAreaElement>>(new Map())
   const saveTimeouts = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map())
   const [focusTaskId, setFocusTaskId] = useState<string | null>(null)
+  const tasksRef = useRef(tasks)
+  tasksRef.current = tasks
 
   useEffect(() => {
     if (focusTaskId) {
@@ -50,8 +52,9 @@ export default function TaskEditor({ tabId, tabName, tasks, onTasksChange }: Tas
 
   const updateTaskText = useCallback(
     (taskId: string, text: string) => {
-      // Update local state immediately
-      onTasksChange(tasks.map((t) => (t.id === taskId ? { ...t, text } : t)))
+      // Update local state immediately using ref for latest tasks
+      const current = tasksRef.current
+      onTasksChange(current.map((t) => (t.id === taskId ? { ...t, text } : t)))
 
       // Debounce save to DB
       const existing = saveTimeouts.current.get(taskId)
@@ -64,7 +67,7 @@ export default function TaskEditor({ tabId, tabName, tasks, onTasksChange }: Tas
         }, 500)
       )
     },
-    [tasks, onTasksChange]
+    [onTasksChange]
   )
 
   const toggleTask = async (taskId: string) => {

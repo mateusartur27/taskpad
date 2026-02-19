@@ -144,6 +144,10 @@ export default function AppPage() {
     return Math.round((completed / tabTasks.length) * 100)
   }
 
+  const handleTasksChange = useCallback((tabId: string) => (newTasks: Task[]) => {
+    setTasks(prev => ({ ...prev, [tabId]: newTasks }))
+  }, [])
+
   if (loading) {
     return (
       <div className="loading-screen">
@@ -258,9 +262,7 @@ export default function AppPage() {
             tabId={activeTab}
             tabName={tabs.find((t) => t.id === activeTab)?.name || ''}
             tasks={tasks[activeTab] || []}
-            onTasksChange={(newTasks) =>
-              setTasks({ ...tasks, [activeTab]: newTasks })
-            }
+            onTasksChange={handleTasksChange(activeTab)}
           />
         )}
       </main>
