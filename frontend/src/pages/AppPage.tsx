@@ -298,6 +298,19 @@ export default function AppPage() {
       >
         <MessageCircle size={24} />
       </a>
+
+      {/* Footer */}
+      <footer className="app-footer">
+        <span>Feito por </span>
+        <a
+          href="https://instagram.com/mateusartur__"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="footer-instagram"
+        >
+          @mateusartur__
+        </a>
+      </footer>
     </div>
   )
 }

@@ -893,6 +893,30 @@ textarea {
 }
 
 /* ==============================
+   Footer
+   ============================== */
+.app-footer {
+  text-align: center;
+  padding: 12px 16px;
+  font-size: 12px;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border);
+  background: var(--bg-secondary);
+}
+
+.footer-instagram {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.footer-instagram:hover {
+  color: var(--accent-hover, #7c6ef5);
+  text-decoration: underline;
+}
+
+/* ==============================
    Responsive
    ============================== */
 @media (max-width: 640px) {
