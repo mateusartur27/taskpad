@@ -6,15 +6,16 @@ import { Plus, Trash2, GripVertical } from 'lucide-react'
 
 interface TaskEditorProps {
   tabId: string
+  tabName: string
   tasks: Task[]
   onTasksChange: (tasks: Task[]) => void
 }
 
-export default function TaskEditor({ tabId, tasks, onTasksChange }: TaskEditorProps) {
+export default function TaskEditor({ tabId, tabName, tasks, onTasksChange }: TaskEditorProps) {
   const { user } = useAuth()
   const [dragIndex, setDragIndex] = useState<number | null>(null)
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
-  const inputRefs = useRef<Map<string, HTMLInputElement>>(new Map())
+  const inputRefs = useRef<Map<string, HTMLTextAreaElement>>(new Map())
   const saveTimeouts = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map())
   const [focusTaskId, setFocusTaskId] = useState<string | null>(null)
 
@@ -79,8 +80,8 @@ export default function TaskEditor({ tabId, tasks, onTasksChange }: TaskEditorPr
     await supabase.from('tasks').delete().eq('id', taskId)
   }
 
-  const handleKeyDown = (e: React.KeyboardEvent, taskId: string, index: number) => {
-    if (e.key === 'Enter') {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>, taskId: string, index: number) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
       addTask()
     } else if (e.key === 'Backspace') {
@@ -96,14 +97,33 @@ export default function TaskEditor({ tabId, tasks, onTasksChange }: TaskEditorPr
         }
       }
     } else if (e.key === 'ArrowUp' && index > 0) {
-      const prevTask = tasks[index - 1]
-      const prevInput = inputRefs.current.get(prevTask.id)
-      if (prevInput) prevInput.focus()
+      const textarea = e.currentTarget
+      const cursorPos = textarea.selectionStart
+      const textBeforeCursor = textarea.value.substring(0, cursorPos)
+      // Only move to previous task if cursor is on the first line
+      if (!textBeforeCursor.includes('\n')) {
+        e.preventDefault()
+        const prevTask = tasks[index - 1]
+        const prevInput = inputRefs.current.get(prevTask.id)
+        if (prevInput) prevInput.focus()
+      }
     } else if (e.key === 'ArrowDown' && index < tasks.length - 1) {
-      const nextTask = tasks[index + 1]
-      const nextInput = inputRefs.current.get(nextTask.id)
-      if (nextInput) nextInput.focus()
+      const textarea = e.currentTarget
+      const cursorPos = textarea.selectionStart
+      const textAfterCursor = textarea.value.substring(cursorPos)
+      // Only move to next task if cursor is on the last line
+      if (!textAfterCursor.includes('\n')) {
+        e.preventDefault()
+        const nextTask = tasks[index + 1]
+        const nextInput = inputRefs.current.get(nextTask.id)
+        if (nextInput) nextInput.focus()
+      }
     }
+  }
+
+  const autoResize = (el: HTMLTextAreaElement) => {
+    el.style.height = 'auto'
+    el.style.height = el.scrollHeight + 'px'
   }
 
   // Drag & drop reorder
@@ -148,6 +168,10 @@ export default function TaskEditor({ tabId, tasks, onTasksChange }: TaskEditorPr
 
   return (
     <div className="task-editor">
+      <div className="editor-title">
+        <h2>{tabName}</h2>
+      </div>
+
       {/* Progress bar */}
       <div className="editor-header">
         <div className="editor-stats">
@@ -200,17 +224,24 @@ export default function TaskEditor({ tabId, tasks, onTasksChange }: TaskEditorPr
                 )}
               </button>
 
-              <input
+              <textarea
                 ref={(el) => {
-                  if (el) inputRefs.current.set(task.id, el)
-                  else inputRefs.current.delete(task.id)
+                  if (el) {
+                    inputRefs.current.set(task.id, el)
+                    autoResize(el)
+                  } else {
+                    inputRefs.current.delete(task.id)
+                  }
                 }}
-                type="text"
                 value={task.text}
-                onChange={(e) => updateTaskText(task.id, e.target.value)}
+                onChange={(e) => {
+                  updateTaskText(task.id, e.target.value)
+                  autoResize(e.target)
+                }}
                 onKeyDown={(e) => handleKeyDown(e, task.id, index)}
                 className="task-input"
                 placeholder="Digite sua tarefa..."
+                rows={1}
               />
 
               <button
@@ -232,7 +263,7 @@ export default function TaskEditor({ tabId, tasks, onTasksChange }: TaskEditorPr
       </div>
 
       <div className="notepad-hint">
-        <kbd>Enter</kbd> nova tarefa &nbsp;·&nbsp; <kbd>Backspace</kbd> em vazio apaga &nbsp;·&nbsp; <kbd>↑</kbd><kbd>↓</kbd> navegar
+        <kbd>Enter</kbd> nova tarefa &nbsp;·&nbsp; <kbd>Shift+Enter</kbd> nova linha &nbsp;·&nbsp; <kbd>Backspace</kbd> em vazio apaga &nbsp;·&nbsp; <kbd>↑</kbd><kbd>↓</kbd> navegar
       </div>
     </div>
   )

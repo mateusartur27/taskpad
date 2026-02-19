@@ -632,6 +632,11 @@ textarea {
   gap: 16px;
 }
 
+.editor-title h2 {
+  font-size: 24px;
+  font-weight: 600;
+}
+
 .editor-header {
   display: flex;
   flex-direction: column;
@@ -665,7 +670,7 @@ textarea {
 
 .notepad-line {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
   padding: 4px 12px;
   border-bottom: 1px solid var(--border);
@@ -691,6 +696,7 @@ textarea {
   align-items: center;
   justify-content: center;
   padding: 4px 0;
+  margin-top: 10px;
   border: none;
   background: none;
   color: var(--text-muted);
@@ -715,6 +721,7 @@ textarea {
   width: 20px;
   height: 20px;
   min-width: 20px;
+  margin-top: 10px;
   border: 2px solid var(--border-light);
   border-radius: 4px;
   background: transparent;
@@ -743,6 +750,10 @@ textarea {
   font-size: 14px;
   outline: none;
   font-family: var(--font-sans);
+  resize: none;
+  overflow: hidden;
+  line-height: 1.5;
+  min-height: 28px;
 }
 
 .task-input::placeholder {
@@ -754,6 +765,7 @@ textarea {
   align-items: center;
   justify-content: center;
   padding: 4px;
+  margin-top: 8px;
   border: none;
   background: transparent;
   color: var(--text-muted);
@@ -805,6 +817,51 @@ textarea {
   border-radius: 3px;
   font-family: var(--font-mono);
   font-size: 11px;
+}
+
+/* ==============================
+   Dashboard Notepad
+   ============================== */
+.dashboard-notepad {
+  margin-top: 32px;
+}
+
+.dashboard-notepad-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  color: var(--text-primary);
+}
+
+.dashboard-notepad-header h3 {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.dashboard-notepad-textarea {
+  width: 100%;
+  min-height: 200px;
+  padding: 16px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.7;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.dashboard-notepad-textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-light);
+}
+
+.dashboard-notepad-textarea::placeholder {
+  color: var(--text-muted);
 }
 
 /* ==============================

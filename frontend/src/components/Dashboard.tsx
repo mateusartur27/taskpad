@@ -1,14 +1,16 @@
 import type { Tab, Task } from '../types'
-import { ClipboardList, CheckCircle2, Circle, ArrowRight } from 'lucide-react'
+import { ClipboardList, CheckCircle2, Circle, ArrowRight, StickyNote } from 'lucide-react'
 
 interface DashboardProps {
   tabs: Tab[]
   tasks: Record<string, Task[]>
   getCompletion: (tabId: string) => number
   onTabClick: (tabId: string) => void
+  noteContent: string
+  onNoteChange: (content: string) => void
 }
 
-export default function Dashboard({ tabs, tasks, getCompletion, onTabClick }: DashboardProps) {
+export default function Dashboard({ tabs, tasks, getCompletion, onTabClick, noteContent, onNoteChange }: DashboardProps) {
   const totalTasks = Object.values(tasks).flat().length
   const completedTasks = Object.values(tasks).flat().filter((t) => t.completed).length
   const overallCompletion = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0
@@ -116,6 +118,20 @@ export default function Dashboard({ tabs, tasks, getCompletion, onTabClick }: Da
             })}
           </div>
         )}
+      </div>
+
+      {/* Quick Notepad */}
+      <div className="dashboard-notepad">
+        <div className="dashboard-notepad-header">
+          <StickyNote size={18} />
+          <h3>Bloco de Notas</h3>
+        </div>
+        <textarea
+          className="dashboard-notepad-textarea"
+          value={noteContent}
+          onChange={(e) => onNoteChange(e.target.value)}
+          placeholder="Anote o que quiser aqui... ideias, lembretes, rascunhos..."
+        />
       </div>
     </div>
   )

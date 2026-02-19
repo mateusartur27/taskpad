@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
 import type { Tab, Task } from '../types'
@@ -23,6 +23,8 @@ export default function AppPage() {
   const [editingTabId, setEditingTabId] = useState<string | null>(null)
   const [editingTabName, setEditingTabName] = useState('')
   const [loading, setLoading] = useState(true)
+  const [noteContent, setNoteContent] = useState('')
+  const noteSaveTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const fetchTabs = useCallback(async () => {
     const { data } = await supabase
@@ -47,13 +49,36 @@ export default function AppPage() {
     }
   }, [])
 
+  const fetchNote = useCallback(async () => {
+    const { data } = await supabase
+      .from('user_notes')
+      .select('content')
+      .single()
+    if (data) {
+      setNoteContent(data.content)
+    } else {
+      // Create note entry if not exists
+      await supabase
+        .from('user_notes')
+        .insert({ user_id: user!.id, content: '' })
+    }
+  }, [user])
+
+  const saveNote = useCallback((content: string) => {
+    setNoteContent(content)
+    if (noteSaveTimeout.current) clearTimeout(noteSaveTimeout.current)
+    noteSaveTimeout.current = setTimeout(async () => {
+      await supabase.from('user_notes').update({ content }).eq('user_id', user!.id)
+    }, 500)
+  }, [user])
+
   useEffect(() => {
     const load = async () => {
-      await Promise.all([fetchTabs(), fetchTasks()])
+      await Promise.all([fetchTabs(), fetchTasks(), fetchNote()])
       setLoading(false)
     }
     load()
-  }, [fetchTabs, fetchTasks])
+  }, [fetchTabs, fetchTasks, fetchNote])
 
   // Real-time subscriptions
   useEffect(() => {
@@ -225,10 +250,13 @@ export default function AppPage() {
             tasks={tasks}
             getCompletion={getTabCompletion}
             onTabClick={setActiveTab}
+            noteContent={noteContent}
+            onNoteChange={saveNote}
           />
         ) : (
           <TaskEditor
             tabId={activeTab}
+            tabName={tabs.find((t) => t.id === activeTab)?.name || ''}
             tasks={tasks[activeTab] || []}
             onTasksChange={(newTasks) =>
               setTasks({ ...tasks, [activeTab]: newTasks })
