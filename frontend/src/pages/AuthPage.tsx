@@ -37,17 +37,12 @@ export default function AuthPage() {
         <div className="auth-header">
           <ClipboardList size={40} strokeWidth={1.5} />
           <h1>TaskPad</h1>
-          <p className="auth-subtitle-app">by <span className="auth-ahub-badge">AHUB</span></p>
           <p>Gerencie suas tarefas com a simplicidade de um bloco de notas</p>
         </div>
 
         <form onSubmit={handleSubmit} className="auth-form">
-          <p className="auth-ahub-label">
-            {isLogin ? 'Entre com sua conta AHUB' : 'Crie sua conta AHUB'}
-          </p>
-
           <div className="input-group">
-            <label htmlFor="email">Email AHUB</label>
+            <label htmlFor="email">Email</label>
             <input
               id="email"
               type="email"
