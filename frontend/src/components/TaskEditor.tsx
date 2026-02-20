@@ -11,6 +11,8 @@ interface TaskEditorProps {
   onTasksChange: (tasks: Task[]) => void
 }
 
+const isMobile = typeof navigator !== 'undefined' && (navigator.maxTouchPoints > 0 || window.matchMedia('(hover: none)').matches)
+
 export default function TaskEditor({ tabId, tabName, tasks, onTasksChange }: TaskEditorProps) {
   const { user } = useAuth()
   const [dragIndex, setDragIndex] = useState<number | null>(null)
@@ -85,7 +87,7 @@ export default function TaskEditor({ tabId, tabName, tasks, onTasksChange }: Tas
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>, taskId: string, index: number) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === 'Enter' && !e.shiftKey && !isMobile) {
       e.preventDefault()
       addTask()
     } else if (e.key === 'Backspace') {
@@ -274,7 +276,10 @@ export default function TaskEditor({ tabId, tabName, tasks, onTasksChange }: Tas
       </div>
 
       <div className="notepad-hint">
-        <kbd>Enter</kbd> nova tarefa &nbsp;·&nbsp; <kbd>Shift+Enter</kbd> nova linha &nbsp;·&nbsp; <kbd>Backspace</kbd> em vazio apaga &nbsp;·&nbsp; <kbd>↑</kbd><kbd>↓</kbd> navegar
+        {isMobile
+          ? <><kbd>Enter</kbd> nova linha &nbsp;·&nbsp; <kbd>Backspace</kbd> em vazio apaga</>
+          : <><kbd>Enter</kbd> nova tarefa &nbsp;·&nbsp; <kbd>Shift+Enter</kbd> nova linha &nbsp;·&nbsp; <kbd>Backspace</kbd> em vazio apaga &nbsp;·&nbsp; <kbd>↑</kbd><kbd>↓</kbd> navegar</>
+        }
       </div>
     </div>
   )
