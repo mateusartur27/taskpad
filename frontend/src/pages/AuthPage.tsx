@@ -37,12 +37,17 @@ export default function AuthPage() {
         <div className="auth-header">
           <ClipboardList size={40} strokeWidth={1.5} />
           <h1>TaskPad</h1>
+          <p className="auth-subtitle-app">by <span className="auth-ahub-badge">AHUB</span></p>
           <p>Gerencie suas tarefas com a simplicidade de um bloco de notas</p>
         </div>
 
         <form onSubmit={handleSubmit} className="auth-form">
+          <p className="auth-ahub-label">
+            {isLogin ? 'Entre com sua conta AHUB' : 'Crie sua conta AHUB'}
+          </p>
+
           <div className="input-group">
-            <label htmlFor="email">Email</label>
+            <label htmlFor="email">Email AHUB</label>
             <input
               id="email"
               type="email"
@@ -77,7 +82,7 @@ export default function AuthPage() {
             ) : (
               <UserPlus size={18} />
             )}
-            {isLogin ? 'Entrar' : 'Criar Conta'}
+            {isLogin ? 'Entrar com conta AHUB' : 'Criar conta AHUB'}
           </button>
         </form>
 
@@ -89,7 +94,7 @@ export default function AuthPage() {
             setSuccess('')
           }}
         >
-          {isLogin ? 'Não tem conta? Criar uma' : 'Já tem conta? Entrar'}
+          {isLogin ? 'Não tem conta AHUB? Criar uma' : 'Já tem conta AHUB? Entrar'}
         </button>
       </div>
     </div>
