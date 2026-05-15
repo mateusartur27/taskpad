@@ -140,6 +140,16 @@ export default function AppPage() {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
+  // Listen for password recovery
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        setShowPasswordModal(true)
+      }
+    })
+    return () => subscription.unsubscribe()
+  }, [])
+
   const addTab = async () => {
     const newPosition = tabs.length
     const { data } = await supabase
