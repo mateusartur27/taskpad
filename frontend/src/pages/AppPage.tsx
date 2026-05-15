@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import type { Tab, Task } from '../types'
 import Dashboard from '../components/Dashboard'
 import TaskEditor from '../components/TaskEditor'
+import ChangePasswordModal from '../components/ChangePasswordModal'
 import {
   LayoutDashboard,
   Plus,
@@ -13,6 +14,8 @@ import {
   Check,
   MessageCircle,
   ClipboardList,
+  ChevronDown,
+  KeyRound,
 } from 'lucide-react'
 
 export default function AppPage() {
@@ -25,6 +28,9 @@ export default function AppPage() {
   const [loading, setLoading] = useState(true)
   const [noteContent, setNoteContent] = useState('')
   const noteSaveTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [showPasswordModal, setShowPasswordModal] = useState(false)
+  const [showUserMenu, setShowUserMenu] = useState(false)
+  const userMenuRef = useRef<HTMLDivElement>(null)
 
   const fetchTabs = useCallback(async () => {
     const { data } = await supabase
@@ -123,6 +129,17 @@ export default function AppPage() {
     }
   }, [fetchTabs, fetchTasks])
 
+  // Close user menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setShowUserMenu(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
   const addTab = async () => {
     const newPosition = tabs.length
     const { data } = await supabase
@@ -187,12 +204,41 @@ export default function AppPage() {
           <h1>TaskPad</h1>
         </div>
         <div className="header-right">
-          <span className="user-email">{user?.email}</span>
-          <button onClick={signOut} className="btn btn-ghost btn-sm" title="Sair">
-            <LogOut size={18} />
-          </button>
+          <div className="user-menu-wrapper" ref={userMenuRef}>
+            <button
+              className={`user-menu-trigger ${showUserMenu ? 'open' : ''}`}
+              onClick={() => setShowUserMenu((v) => !v)}
+            >
+              <span className="user-email">{user?.email}</span>
+              <ChevronDown size={14} className="chevron-icon" />
+            </button>
+
+            {showUserMenu && (
+              <div className="user-menu-dropdown">
+                <button
+                  onClick={() => {
+                    setShowUserMenu(false)
+                    setShowPasswordModal(true)
+                  }}
+                >
+                  <KeyRound size={14} />
+                  Alterar senha
+                </button>
+                <div className="user-menu-separator" />
+                <button className="danger" onClick={signOut}>
+                  <LogOut size={14} />
+                  Sair
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </header>
+
+      {/* Change Password Modal */}
+      {showPasswordModal && (
+        <ChangePasswordModal onClose={() => setShowPasswordModal(false)} />
+      )}
 
       {/* Tabs Bar */}
       <nav className="tabs-bar">
