@@ -19,7 +19,7 @@ import {
 } from 'lucide-react'
 
 export default function AppPage() {
-  const { user, signOut } = useAuth()
+  const { user, signOut, showPasswordRecovery, setShowPasswordRecovery } = useAuth()
   const [tabs, setTabs] = useState<Tab[]>([])
   const [tasks, setTasks] = useState<Record<string, Task[]>>({})
   const [activeTab, setActiveTab] = useState<string>('dashboard')
@@ -31,6 +31,13 @@ export default function AppPage() {
   const [showPasswordModal, setShowPasswordModal] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
   const userMenuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (showPasswordRecovery) {
+      setShowPasswordModal(true)
+      setShowPasswordRecovery(false)
+    }
+  }, [showPasswordRecovery, setShowPasswordRecovery])
 
   const fetchTabs = useCallback(async () => {
     const { data } = await supabase
@@ -138,16 +145,6 @@ export default function AppPage() {
     }
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
-
-  // Listen for password recovery
-  useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'PASSWORD_RECOVERY') {
-        setShowPasswordModal(true)
-      }
-    })
-    return () => subscription.unsubscribe()
   }, [])
 
   const addTab = async () => {
