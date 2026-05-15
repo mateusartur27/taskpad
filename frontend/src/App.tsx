@@ -3,8 +3,10 @@ import AuthPage from './pages/AuthPage'
 import AppPage from './pages/AppPage'
 import { Loader2 } from 'lucide-react'
 
+import ChangePasswordModal from './components/ChangePasswordModal'
+
 function AppContent() {
-  const { user, loading } = useAuth()
+  const { user, loading, showPasswordRecovery, setShowPasswordRecovery } = useAuth()
 
   if (loading) {
     return (
@@ -14,7 +16,14 @@ function AppContent() {
     )
   }
 
-  return user ? <AppPage /> : <AuthPage />
+  return (
+    <>
+      {user ? <AppPage /> : <AuthPage />}
+      {showPasswordRecovery && (
+        <ChangePasswordModal onClose={() => setShowPasswordRecovery(false)} />
+      )}
+    </>
+  )
 }
 
 export default function App() {
