@@ -2,11 +2,19 @@ import { AuthProvider, useAuth } from './contexts/AuthContext'
 import AuthPage from './pages/AuthPage'
 import AppPage from './pages/AppPage'
 import { Loader2 } from 'lucide-react'
-
-import ChangePasswordModal from './components/ChangePasswordModal'
+import ResetPasswordPage from './pages/ResetPasswordPage'
 
 function AppContent() {
-  const { user, loading, showPasswordRecovery, setShowPasswordRecovery } = useAuth()
+  const { user, loading } = useAuth()
+  
+  // Check if we're on the reset password route
+  const isResetPasswordRoute = 
+    window.location.search.includes('page=reset-password') || 
+    (window.location.hash.includes('access_token') && window.location.hash.includes('type=recovery'))
+
+  if (isResetPasswordRoute) {
+    return <ResetPasswordPage />
+  }
 
   if (loading) {
     return (
@@ -16,14 +24,7 @@ function AppContent() {
     )
   }
 
-  return (
-    <>
-      {user ? <AppPage /> : <AuthPage />}
-      {showPasswordRecovery && (
-        <ChangePasswordModal onClose={() => setShowPasswordRecovery(false)} />
-      )}
-    </>
-  )
+  return user ? <AppPage /> : <AuthPage />
 }
 
 export default function App() {
